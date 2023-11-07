@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>To-Do List with Username</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: black;
+            color: white;
+        }
+
+        #app {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        #username-display {
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        #username-input-label,
+        #username,
+        #change-username {
+            display: block;
+        }
+
+        #todo-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        #todo-list li {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            border: none;
+            background-color: whitesmoke;
+            margin: 5px 0;
+            padding: 5px 10px;
+            color: black;
+            border-radius: 5px;
+        }
+
+        #add {
+            background-color: red;
+            border-radius: 3px;
+        }
+
+        button {
+            background: blue;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        #task {
+            width: 15rem;
+            height: 1.5rem;
+            border-radius: 10px;
+            border: none;
+            /* border: 2px solid red; */
+            color: black;
+            padding-left: 20px;
+        }
+
+        .change {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: whitesmoke;
+        }
+
+        #username {
+            height: 20px;
+            width: 15rem;
+            border-radius: 3px;
+            padding: 8px;
+            border: none;
+        }
+
+        .delete {
+            background-color: red;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <h1>To-Do List</h1>
+        <div id="username-display"></div>
+        <div class="change">
+            <label id="username-input-label" for="username">Username:</label>
+            <input type="text" id="username" placeholder="Enter your username">
+        </div>
+        <button id="change-username" style="display: block;margin-left: 8rem;margin-bottom: 2rem;">Change
+            Username</button>
+        <input type="text" id="task" placeholder="Add a new task">
+        <button id="add">Add</button>
+        <ul id="todo-list"></ul>
+    </div>
+
+    <script>
+        // Get the existing tasks and username from local storage
+        const tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+        const savedUsername = localStorage.getItem('username');
+
+        // Set the username input field to the saved username
+        if (savedUsername) {
+            document.getElementById('username').value = savedUsername;
+            displayUsername(savedUsername);
+        }
+
+        // Function to display the username
+        function displayUsername(username) {
+            document.getElementById('username-display').textContent = `Username: ${username}`;
+            document.getElementById('username-input-label').style.display = 'none';
+            document.getElementById('username').style.display = 'none';
+            document.getElementById('change-username').style.display = 'block';
+        }
+
+        // Function to render the tasks
+        function renderTasks() {
+            const todoList = document.getElementById('todo-list');
+            todoList.innerHTML = '';
+
+            tasks.forEach((task, index) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span>${task}</span>
+                    <button class="edit" data-index="${index}">Edit</button>
+                    <button class="delete" data-index="${index}">Delete</button>
+                `;
+                todoList.appendChild(li);
+            });
+        }
+
+        // Add a new task
+        const addBtn = document.getElementById('add');
+        addBtn.addEventListener('click', () => {
+            const taskInput = document.getElementById('task');
+            const taskText = taskInput.value.trim();
+
+            if (taskText !== '') {
+                tasks.push(taskText);
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                renderTasks();
+                taskInput.value = '';
+            }
+        });
+
+        // Save the username when it changes
+        document.getElementById('username').addEventListener('change', () => {
+            const username = document.getElementById('username').value;
+            localStorage.setItem('username', username);
+            displayUsername(username);
+        });
+
+        // Change the username
+        const changeUsernameBtn = document.getElementById('change-username');
+        changeUsernameBtn.addEventListener('click', () => {
+            document.getElementById('username').style.display = 'block';
+            document.getElementById('username-input-label').style.display = 'block';
+            changeUsernameBtn.style.display = 'flex';
+            changeUsernameBtn.style.marginLeft = "30%"
+            changeUsernameBtn.style.marginBottom = "10%"
+        });
+
+        // Edit or Delete a task
+        document.getElementById('todo-list').addEventListener('click', (event) => {
+            if (event.target.classList.contains('delete')) {
+                const index = event.target.getAttribute('data-index');
+                tasks.splice(index, 1);
+                localStorage.setItem('tasks', JSON.stringify(tasks));
+                renderTasks();
+            } else if (event.target.classList.contains('edit')) {
+                const index = event.target.getAttribute('data-index');
+                const editedTask = prompt('Edit task:', tasks[index]);
+                if (editedTask !== null) {
+                    tasks[index] = editedTask;
+                    localStorage.setItem('tasks', JSON.stringify(tasks));
+                    renderTasks();
+                }
+
+            }
+        });
+
+        // Initial rendering
+        renderTasks();
+    </script>
+</body>
+
+</html>
